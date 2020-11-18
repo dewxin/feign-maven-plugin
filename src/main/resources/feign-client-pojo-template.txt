@@ -1,0 +1,6 @@
+package fun.enou.feign.generated.auto_client;
+
+public class ^pojoNameStub$ {
+    
+    ^fieldStub$
+}

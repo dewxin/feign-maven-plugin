@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -12,8 +13,12 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import fun.enou.maven.tool.ClassFilter;
-import fun.enou.maven.tool.JarHandler;
+import fun.enou.maven.file.JarHandler;
+import fun.enou.maven.file.TemplateHandler;
+import fun.enou.maven.model.CtrlEntity;
+import fun.enou.maven.model.DataHolder;
+import fun.enou.maven.tool.Filter;
+import fun.enou.maven.tool.DebugOutput;
 import fun.enou.maven.tool.Logger;
 
 
@@ -29,42 +34,46 @@ public class FeignMojo extends AbstractMojo{
 		
 		
 		try {
-			example();
-			learn();
-		} catch (Exception e) {
+			run();
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private void example() throws IOException, ClassNotFoundException {
+	private void run() throws IOException, ClassNotFoundException {
 		
 		JarHandler jarHandler = new JarHandler();
 		
 		Logger.info("feign mojo is working");
 
-		String path = jarHandler.findJarFileAndRetPath();
+		jarHandler.init();
 		
-		List<Class<?>> classList = jarHandler.loadAllClasses(path);
-		for(Class<?> aClass : classList) {
-			Logger.debug("print all class");
-			Logger.debug(aClass.toString());
-		}
+		Logger.debug("");
+		Logger.debug("application name is "+jarHandler.getApplicationName());
+		DataHolder.instance().setApplicationName(jarHandler.getApplicationName());
+		
+		List<Class<?>> classList = jarHandler.loadAllClasses();
 		
 		List<Class<?>> ctrlAnnotatedClassList = 
-				classList.stream().filter(ClassFilter::hasCtrlAnote).collect(Collectors.toList());
+				classList.stream().filter(Filter::hasRestCtrlAnote).collect(Collectors.toList());
 
+		
+		DebugOutput.annotatedClass(ctrlAnnotatedClassList);
+		DebugOutput.annotateMethod(ctrlAnnotatedClassList);
+		
 		for(Class<?> aClass : ctrlAnnotatedClassList) {
-			Logger.debug("print controller annotated class");
-			Logger.debug(aClass.toString());
+			CtrlEntity ctrlEntity = CtrlEntity.toEntity(aClass);
+			DataHolder.instance().addCtrlEntity(ctrlEntity);
 		}
+		
+		TemplateHandler templateHandler = 
+				new TemplateHandler(DataHolder.instance().getApplicationName(), DataHolder.instance().getCtrlEntityList());
+		
+		templateHandler.init();
+		
+		templateHandler.generateAllCtrlAndPojo();
 		
 	}
 	
-	
-	
-	private void learn() {
-		String packageName = this.getClass().getPackage().getName();
-		Logger.debug(packageName);
-	}
 
 }

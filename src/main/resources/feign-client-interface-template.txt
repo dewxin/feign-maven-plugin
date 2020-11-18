@@ -1,0 +1,15 @@
+package fun.enou.feign.generated.auto_client;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+^importStub$
+
+@FeignClient(^feignClientAnnotationStub$) 
+public interface ^controllerNameStub$Client {
+    
+    ^methodStub$
+}
