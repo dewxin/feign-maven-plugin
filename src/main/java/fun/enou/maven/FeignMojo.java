@@ -40,7 +40,7 @@ public class FeignMojo extends AbstractMojo{
 		}
 	}
 	
-	private void run() throws IOException, ClassNotFoundException {
+	private void run() throws IOException, ClassNotFoundException, InterruptedException {
 		
 		JarHandler jarHandler = new JarHandler();
 		
@@ -72,6 +72,9 @@ public class FeignMojo extends AbstractMojo{
 		templateHandler.init();
 		
 		templateHandler.generateAllCtrlAndPojo();
+		
+		
+		//todo genereate restTemplate and package the genereated file
 		
 	}
 	

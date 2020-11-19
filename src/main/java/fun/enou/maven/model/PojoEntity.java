@@ -43,7 +43,7 @@ public class PojoEntity {
 				
 				pojoGenerated.add(className);
 				List<String> pojoLines = generateOnePojo(aClass, pojoTemplateLines);
-				String fileName = FileHandler.getBaseDir() + aClass.getSimpleName() + ".java";
+				String fileName = FileHandler.getCodeDir() + aClass.getSimpleName() + ".java";
 
 				FileHandler.writeToFile(fileName, pojoLines);
 			} catch (ClassNotFoundException exception) {

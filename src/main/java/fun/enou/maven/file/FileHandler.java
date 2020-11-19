@@ -10,7 +10,9 @@ import fun.enou.maven.tool.Logger;
 
 public class FileHandler {
 
-	private static String baseDir = "target/enou-feignpp/fun/enou/feign/generated/auto_client/";
+	private static String codeDir = "target/enou-feignpp/src/main/java/fun/enou/feign/generated/auto_client/";
+	
+	private static String baseDir = "target/enou-feignpp/";
 
 	
 	public static void writeToFile(String fileName, List<String> lines) throws IOException {
@@ -26,10 +28,15 @@ public class FileHandler {
 	public static String getBaseDir() {
 		return baseDir;
 	}
+	
+	public static String getCodeDir() {
+		return codeDir;
+	}
 
 	public static void setBaseDir(String baseDir) {
-		FileHandler.baseDir = baseDir;
+		FileHandler.codeDir = baseDir;
 	}
+	
 	
 	
 }

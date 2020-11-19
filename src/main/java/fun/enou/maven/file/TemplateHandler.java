@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import fun.enou.maven.model.CtrlEntity;
@@ -26,9 +27,11 @@ public class TemplateHandler {
 	
 	private static final String INTERFACE_FILE_NAME ="/feign-client-interface-template.txt";
 	private static final String POJO_FILE_NAME ="/feign-client-pojo-template.txt";
+	private static final String MAVEN_POM_FILE_NAME ="/feign-maven-template.txt";
 	private static final String FEIGN_CLIENT_STUB = "^feignClientAnnotationStub$";
 	private static final String CONTROLLER_NAME_STUB = "^controllerNameStub$";
 	private static final String METHOD_STUB = "^methodStub$"; 
+	private static final String APPLICATION_NAME_STUB = "^applicationNameStub$"; 
 	
 	private static final String IMPORT_STUB = "^importStub$";
 
@@ -83,8 +86,8 @@ public class TemplateHandler {
 	}
 	
 	//todo need tab to make the code look beautiful
-	public void generateAllCtrlAndPojo() throws IOException, ClassNotFoundException {
-		String baseDir = FileHandler.getBaseDir();
+	public void generateAllCtrlAndPojo() throws IOException, ClassNotFoundException, InterruptedException {
+		String baseDir = FileHandler.getCodeDir();
 		File dir = new File(baseDir);
 		if(!dir.exists())
 			dir.mkdirs();
@@ -95,6 +98,33 @@ public class TemplateHandler {
 		}
 		
 		PojoEntity.generateAllPojo(pojoTemplateLines);
+		List<String> pomLines = getMavenPomLines();
+		FileHandler.writeToFile(FileHandler.getBaseDir()+"pom.xml", pomLines);
+		ProcessBuilder pb = new ProcessBuilder("mvn.cmd", "install", "-f", FileHandler.getBaseDir()+"pom.xml");
+		pb.redirectErrorStream();
+		Process process = pb.start();
+		process.waitFor();
+		System.out.println(process.exitValue());
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "GBK"))) {
+		    String result = reader.lines()
+		            .collect(Collectors.joining("\n"));
+		    System.out.println(result);
+		}
+	}
+	
+	private List<String> getMavenPomLines() throws IOException {
+		InputStream inputStream =this.getClass().getResourceAsStream(MAVEN_POM_FILE_NAME);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+		
+		List<String> mavenPomLines = new LinkedList<String>();
+		String line = "";
+		while((line = reader.readLine()) != null) {
+			if(line.contains(APPLICATION_NAME_STUB))
+				line = line.replace(APPLICATION_NAME_STUB, applicationName.toLowerCase());
+			mavenPomLines.add(line);
+		}
+		
+		return mavenPomLines;
 	}
 	
 	
