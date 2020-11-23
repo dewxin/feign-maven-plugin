@@ -1,6 +1,7 @@
 package fun.enou.maven.model;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
@@ -10,8 +11,10 @@ import java.util.List;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import fun.enou.maven.tool.Logger;
 
@@ -26,7 +29,7 @@ public class MethodEntity {
 	//method
 	private String retType = ""; 
 	private String methodName = "";
-	private List<String> parameterTypeList = new ArrayList<String>();
+	private ArrayList<ParamEntity> parameterList = new ArrayList<ParamEntity>();
 	
 	
 	
@@ -38,12 +41,15 @@ public class MethodEntity {
 		
 		List<String> paramTypeWithVarList = new ArrayList<>();
 		
-		int index = 0;
-		for(String paramType : parameterTypeList) {
-			index++;
-			String paramTypeWithVar = MessageFormat.format("{0} {1}", paramType, "arg"+index);
-			paramTypeWithVarList.add(paramTypeWithVar);
+		for(ParamEntity paramEntity : parameterList) {
+
+			String paramType = paramEntity.getParamType();
+			String paramName = paramEntity.getParamName();
+			String paramAnote = paramEntity.getAnnotation();
+			String paramTypeWithVar = MessageFormat.format("{2} {0} {1}", paramType, paramName, paramAnote);
+			paramTypeWithVarList.add(paramTypeWithVar);	
 		}
+
 		
 		String params = String.join(",", paramTypeWithVarList);
 		String method = MessageFormat.format("{0} {1}({2});", retType, methodName, params);
@@ -116,14 +122,47 @@ public class MethodEntity {
 			methodEntity.retType = "EnouMsgJson<" + methodEntity.retType + ">";
 		}
 
-		for(Class<?> type: method.getParameterTypes()) {
-			TypeEntityByStrFormat typeEntity = TypeEntityByStrFormat.parse(type.getName());
-			methodEntity.parameterTypeList.add(typeEntity.getSelfDefSimpleName());
+		for(Parameter param: method.getParameters()) {
+			
+			ParamEntity paramEntity = new ParamEntity();
+			
+			TypeEntityByStrFormat typeEntity = TypeEntityByStrFormat.parse(param.getType().getName());
+			paramEntity.setParamName(param.getName());
+			paramEntity.setParamType(typeEntity.getSelfDefSimpleName());
+			
+			// could only exists one.
+			PathVariable pathVariable = param.getAnnotation(PathVariable.class);
+			if(pathVariable != null){
+				// @PathVariable(value="value")
+				String pathVariableValue = pathVariable.value();
+				if(pathVariableValue.equals(""))
+					pathVariableValue = param.getName();
+
+				String annotationStr = MessageFormat.format(
+						"@PathVariable(value=\"{0}\")", pathVariableValue);
+				
+				paramEntity.setAnnotation(annotationStr);
+			}
+			
+			RequestParam requestParam = param.getAnnotation(RequestParam.class);
+			if(requestParam != null) {
+				String requestParamValue = requestParam.value();
+				if(requestParamValue.equals(""))
+					requestParamValue = param.getName();
+				
+				String annotationStr = MessageFormat.format(
+						"@RequestParam(value=\"{0}\")", requestParamValue);
+				
+				paramEntity.setAnnotation(annotationStr);
+			}
+			
+			
+			methodEntity.parameterList.add(paramEntity);
 		}
+
 		
 		return methodEntity;
 	}
-	
 	
 	public String getMapType() {
 		return mapType;
@@ -149,12 +188,8 @@ public class MethodEntity {
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
 	}
-	public void addParameterType(String type) {
-		parameterTypeList.add(type);
-	}
-	
-	
 
+	
 	
 	
 }

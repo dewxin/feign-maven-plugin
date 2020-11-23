@@ -1,7 +1,9 @@
-package fun.enou.maven.model;
+package fun.enou.maven.tool;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import fun.enou.maven.model.CtrlEntity;
 
 public class DataHolder {
 	
