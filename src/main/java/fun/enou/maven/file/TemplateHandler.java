@@ -104,11 +104,11 @@ public class TemplateHandler {
 		pb.redirectErrorStream();
 		Process process = pb.start();
 		process.waitFor();
-		System.out.println(process.exitValue());
+		Logger.debug("{0}",process.exitValue());
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "GBK"))) {
 		    String result = reader.lines()
 		            .collect(Collectors.joining("\n"));
-		    System.out.println(result);
+		    Logger.debug(result);
 		}
 	}
 	
@@ -116,7 +116,7 @@ public class TemplateHandler {
 		InputStream inputStream =this.getClass().getResourceAsStream(MAVEN_POM_FILE_NAME);
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 		
-		List<String> mavenPomLines = new LinkedList<String>();
+		List<String> mavenPomLines = new LinkedList<>();
 		String line = "";
 		while((line = reader.readLine()) != null) {
 			if(line.contains(APPLICATION_NAME_STUB))

@@ -5,9 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.Enumeration;
@@ -15,8 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-
-import javax.swing.LookAndFeel;
 
 import fun.enou.maven.tool.Logger;
 
@@ -33,7 +28,7 @@ public class JarHandler {
 		}
 	}
 	
-	private String findJarFileAndRetPath() throws MalformedURLException {
+	private String findJarFileAndRetPath(){
 		File targeDir = new File("target");
 
 		String[] filenameArray = targeDir.list((dir,name)->{return name.matches("(.*).jar");});
@@ -70,6 +65,9 @@ public class JarHandler {
 			while (e.hasMoreElements()) {
 				JarEntry javaEntry = e.nextElement();
 				if (javaEntry.isDirectory() || !javaEntry.getName().endsWith(".class")) {
+					continue;
+				}
+				if(!javaEntry.getName().startsWith("BOOT-INF/classes")) {
 					continue;
 				}
 				

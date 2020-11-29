@@ -5,6 +5,7 @@ import java.util.Arrays;
 import fun.enou.maven.tool.Logger;
 
 public class TypeEntityByStrFormat {
+	
 
 	//including the generic type org.springframework.http.ResponseEntity<java.lang.String> 
 	private String fullGenericName; 
@@ -39,12 +40,12 @@ public class TypeEntityByStrFormat {
 			return fullName;
 		}
 		
-		Logger.debug("fullname is "+ fullName);
+		//Logger.debug("fullname is "+ fullName);
 		
 		String[] nameArray = fullName.split("\\.");
 		
-		Arrays.asList(nameArray).forEach( name -> Logger.debug(fullName));
-		Logger.debug("length is " + nameArray.length );
+		//Arrays.asList(nameArray).forEach( name -> Logger.debug(fullName));
+		//Logger.debug("length is " + nameArray.length );
 
 		
 		return nameArray[nameArray.length-1];
@@ -58,6 +59,7 @@ public class TypeEntityByStrFormat {
 		typeEntity.fullName = getFullName(typeName);
 		typeEntity.simpleName = getSimpleName(typeEntity.fullName);
 		
+		// extract the code  todo
 		PojoEntity.addPojoToGenerate(typeEntity.fullName);
 		
 		if(hasInnerType(typeName)) {

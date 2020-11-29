@@ -16,7 +16,10 @@ public class PojoEntity {
 	private static final String FIELD_STUB = "^fieldStub$";
 
 	private static HashSet<String> pojoToBeGenerated = new HashSet<>();
+	private static HashSet<String> anotherTobeGenerated = new HashSet<>();
 	private static HashSet<String> pojoGenerated = new HashSet<>();
+	
+	private static boolean generateAnotherPojo = false;
 	
 	public static boolean addPojoToGenerate(String classFullName) {
 		if(classFullName.equals("void"))
@@ -25,15 +28,44 @@ public class PojoEntity {
 			return false;
 		if(pojoToBeGenerated.contains(classFullName)) 
 			return false;
+		if(pojoGenerated.contains(classFullName))
+			return false;
+		if(anotherTobeGenerated.contains(classFullName))
+			return false;
 
-		pojoToBeGenerated.add(classFullName);
+		if(generateAnotherPojo) {
+			anotherTobeGenerated.add(classFullName);
+			Logger.debug("{0} is added to another pojo set",classFullName);
+		} else {
+			pojoToBeGenerated.add(classFullName);
+			Logger.debug("{0} is added to pojoToBeGenerated set",classFullName);
+		}
+
 		return true;
+	}
+	
+	private static void getAnotherPojo() throws ClassNotFoundException {
+		generateAnotherPojo = true;
+		Logger.debug("start get another pojo");
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		for(String className : pojoToBeGenerated) {
+			Class<?> aClass = Class.forName(className, true, classLoader);
+			for(Field field : aClass.getDeclaredFields()) {
+				if(pojoGenerated.contains(className))
+					continue;
+				String genericName = field.getGenericType().getTypeName();
+				genericName = TypeEntityByStrFormat.parse(genericName).getSelfDefSimpleName();
+			}
+		}
+		generateAnotherPojo = false;
 	}
 	
 	//todo rebuild
 	public static void generateAllPojo(List<String> pojoTemplateLines) throws ClassNotFoundException, IOException {
-		
+		getAnotherPojo();
+		Logger.debug("start generate all pojo");
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		pojoToBeGenerated.addAll(anotherTobeGenerated);
 		for(String className : pojoToBeGenerated) {
 			try {
 				
@@ -66,8 +98,13 @@ public class PojoEntity {
 				
 				for(Field field : aClass.getDeclaredFields()) {
 					
-					String className = field.getType().getSimpleName();
+					
+					String className = field.getGenericType().getTypeName();
+					className = TypeEntityByStrFormat.parse(className).getSelfDefSimpleName();
 					String fieldName = field.getName();
+					// if the filed's class is not in the pojoTobeGenerated or pojoGenerated,
+					// then put it in the pojoTobeGenerated
+					// and be careful here, if It's a list or array, get the inner type
 					
 					String fieldLine = MessageFormat.format("private {0} {1};", className, fieldName);
 					

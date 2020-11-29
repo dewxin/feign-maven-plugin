@@ -35,7 +35,7 @@ public class FeignMojo extends AbstractMojo{
 		
 		try {
 			run();
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
