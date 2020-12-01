@@ -2,11 +2,14 @@ package fun.enou.maven.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.springframework.boot.loader.JarLauncher;
 import org.springframework.boot.loader.archive.Archive;
 import org.springframework.boot.loader.archive.JarFileArchive;
 import org.springframework.boot.loader.jar.JarFile;
+
+import fun.enou.maven.tool.Logger;
 
 /**
  * use the springframwork loader to load the class
@@ -19,12 +22,19 @@ public class EnouJarLuncher extends JarLauncher{
 		super(archive);
 	}
 	
-	public void init() throws Exception {
+	public void init(){
 		if (!isExploded()) {
 			JarFile.registerUrlProtocolHandler();
 		}
-		ClassLoader classLoader = createClassLoader(getClassPathArchivesIterator());
-		Thread.currentThread().setContextClassLoader(classLoader);
+
+		try {
+			ClassLoader classLoader = createClassLoader(getClassPathArchivesIterator());
+			Thread.currentThread().setContextClassLoader(classLoader);
+		} catch (Exception e) {
+			Logger.error("cannot create classLoader");
+			Logger.error(Arrays.toString(e.getStackTrace()));
+			System.exit(1);
+		}
 	}
 	
 	

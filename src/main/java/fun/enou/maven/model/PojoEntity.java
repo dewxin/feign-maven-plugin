@@ -3,11 +3,11 @@ package fun.enou.maven.model;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.MessageFormat;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
 import fun.enou.maven.file.FileHandler;
+import fun.enou.maven.tool.DataCenter;
 import fun.enou.maven.tool.Logger;
 
 public class PojoEntity {
@@ -15,72 +15,20 @@ public class PojoEntity {
 	private static final String POJO_NAME_STUB = "^pojoNameStub$";
 	private static final String FIELD_STUB = "^fieldStub$";
 
-	private static HashSet<String> pojoToBeGenerated = new HashSet<>();
-	private static HashSet<String> anotherTobeGenerated = new HashSet<>();
-	private static HashSet<String> pojoGenerated = new HashSet<>();
-	
-	private static boolean generateAnotherPojo = false;
-	
-	public static boolean addPojoToGenerate(String classFullName) {
-		if(classFullName.equals("void"))
-			return false;
-		if(classFullName.startsWith("java."))
-			return false;
-		if(pojoToBeGenerated.contains(classFullName)) 
-			return false;
-		if(pojoGenerated.contains(classFullName))
-			return false;
-		if(anotherTobeGenerated.contains(classFullName))
-			return false;
-
-		if(generateAnotherPojo) {
-			anotherTobeGenerated.add(classFullName);
-			Logger.debug("{0} is added to another pojo set",classFullName);
-		} else {
-			pojoToBeGenerated.add(classFullName);
-			Logger.debug("{0} is added to pojoToBeGenerated set",classFullName);
-		}
-
-		return true;
-	}
-	
-	private static void getAnotherPojo() throws ClassNotFoundException {
-		generateAnotherPojo = true;
-		Logger.debug("start get another pojo");
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		for(String className : pojoToBeGenerated) {
-			Class<?> aClass = Class.forName(className, true, classLoader);
-			for(Field field : aClass.getDeclaredFields()) {
-				if(pojoGenerated.contains(className))
-					continue;
-				String genericName = field.getGenericType().getTypeName();
-				genericName = TypeEntityByStrFormat.parse(genericName).getSelfDefSimpleName();
-			}
-		}
-		generateAnotherPojo = false;
-	}
-	
-	//todo rebuild
 	public static void generateAllPojo(List<String> pojoTemplateLines) throws ClassNotFoundException, IOException {
-		getAnotherPojo();
-		Logger.debug("start generate all pojo");
+		Logger.debug("start generating all pojo");
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		pojoToBeGenerated.addAll(anotherTobeGenerated);
-		for(String className : pojoToBeGenerated) {
+		for(String className : DataCenter.instance().getPojoClassNameList()){
 			try {
 				
 				Class<?> aClass = Class.forName(className, true, classLoader);
-				if(pojoGenerated.contains(className))
-					continue;
-				
-				pojoGenerated.add(className);
 				List<String> pojoLines = generateOnePojo(aClass, pojoTemplateLines);
 				String fileName = FileHandler.getCodeDir() + aClass.getSimpleName() + ".java";
 
 				FileHandler.writeToFile(fileName, pojoLines);
 			} catch (ClassNotFoundException exception) {
-				Logger.debug(className + "not found ");
-				Logger.debug(exception.getMessage());
+				Logger.warn(className + "not found ");
+				Logger.warn(exception.getMessage());
 			}
 		}
 	}
@@ -100,7 +48,7 @@ public class PojoEntity {
 					
 					
 					String className = field.getGenericType().getTypeName();
-					className = TypeEntityByStrFormat.parse(className).getSelfDefSimpleName();
+					className = TypeNameEntity.parse(className).getSelfDefSimpleName();
 					String fieldName = field.getName();
 					// if the filed's class is not in the pojoTobeGenerated or pojoGenerated,
 					// then put it in the pojoTobeGenerated

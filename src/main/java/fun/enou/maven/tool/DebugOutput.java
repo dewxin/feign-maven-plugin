@@ -5,15 +5,20 @@ import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 public class DebugOutput {
+	
+	private DebugOutput() {
+		throw new IllegalStateException("Utility class");
+	}
 
-	public static void annotatedClass(List<Class<?>> ctrlAnnotatedClassList) {
+	public static void annotatedClassAndMethod(List<Class<?>> classList) {
+		annotateClass(classList);
+		annotateMethod(classList);
+	}
+
+	public static void annotateClass(List<Class<?>> ctrlAnnotatedClassList) {
 		Logger.debug("");
 		Logger.debug("--- start print annotated class ---");
 		for(Class<?> aClass : ctrlAnnotatedClassList) {
@@ -34,7 +39,7 @@ public class DebugOutput {
 			for(Method m : moMethods) {
 				Annotation[] methodAnnotations = m.getAnnotations();
 				for(Annotation annotation : methodAnnotations) {
-					if(Filter.isSpecificMapping(annotation) || annotation instanceof RequestMapping) {
+					if(Filter.isHttpMappingAnnotation(annotation) || annotation instanceof RequestMapping) {
 						
 						Logger.debug("annotation is " + annotation.toString());
 						Logger.debug("annotated method is " + m);

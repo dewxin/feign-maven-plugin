@@ -8,12 +8,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 public class Filter {
 	
+	private Filter() {
+	}
+
 	public static boolean hasRestCtrlAnote(Class<?> aClass) {
 		
 		String message = MessageFormat.format(
@@ -42,8 +44,10 @@ public class Filter {
 		return false;
 	}
 	
-	public static boolean isSpecificMapping(Annotation annotation) {
+	public static boolean isHttpMappingAnnotation(Annotation annotation) {
 		return (annotation instanceof GetMapping|| annotation instanceof PostMapping
 				|| annotation instanceof PatchMapping || annotation instanceof DeleteMapping);
 	}
+
+
 }

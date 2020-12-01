@@ -1,10 +1,7 @@
 package fun.enou.maven.model;
 
-import java.util.Arrays;
 
-import fun.enou.maven.tool.Logger;
-
-public class TypeEntityByStrFormat {
+public class TypeNameEntity {
 	
 
 	//including the generic type org.springframework.http.ResponseEntity<java.lang.String> 
@@ -13,7 +10,7 @@ public class TypeEntityByStrFormat {
 	private String fullName;
 	//ResponseEntity
 	private String simpleName;
-	private TypeEntityByStrFormat innerGenericType;
+	private TypeNameEntity innerGenericType;
 	
 	public static String getInnerGenriceType(String type) {
 		int leftArrowIndex = type.indexOf("<");
@@ -52,25 +49,24 @@ public class TypeEntityByStrFormat {
 		
 	}
 	
-	public static TypeEntityByStrFormat parse(String typeName) {
+	public static TypeNameEntity parse(String typeName) {
 		
-		TypeEntityByStrFormat typeEntity = new TypeEntityByStrFormat();
+		TypeNameEntity typeEntity = new TypeNameEntity();
 		typeEntity.fullGenericName = typeName;
 		typeEntity.fullName = getFullName(typeName);
 		typeEntity.simpleName = getSimpleName(typeEntity.fullName);
 		
 		// extract the code  todo
-		PojoEntity.addPojoToGenerate(typeEntity.fullName);
+		// OldPojoEntity.addPojoToGenerate(typeEntity.fullName);
 		
 		if(hasInnerType(typeName)) {
 			String subTypeStr = getInnerGenriceType(typeName);
-			TypeEntityByStrFormat subType = TypeEntityByStrFormat.parse(subTypeStr);
+			TypeNameEntity subType = TypeNameEntity.parse(subTypeStr);
 			typeEntity.innerGenericType = subType;
 		}
 		
 		return typeEntity;
 	}
-	
 	
 	public String getSelfDefSimpleName() {
 		
@@ -82,7 +78,6 @@ public class TypeEntityByStrFormat {
 		return currentName;
 	}
 
-	
 	public String getFullName() {
 		return fullName;
 	}

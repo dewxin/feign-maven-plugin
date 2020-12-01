@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 ^importStub$
 
 @FeignClient(^feignClientAnnotationStub$) 
-public interface ^controllerNameStub$Client {
+public interface ^appNameStub$Client {
     
     ^methodStub$
 }

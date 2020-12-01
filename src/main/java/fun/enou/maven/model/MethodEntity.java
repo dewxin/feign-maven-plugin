@@ -36,7 +36,7 @@ public class MethodEntity {
 	public List<String> toStringList() {
 		ArrayList<String> arrayList = new ArrayList<>();
 		
-		String annotation = MessageFormat.format("@{0}(\"{1}\")", mapType, mapPath);
+		String annotation = MessageFormat.format("@{0}(\"{1}\")", mapType, ctrlEntity.getPath() + mapPath);
 		arrayList.add(annotation);
 		
 		List<String> paramTypeWithVarList = new ArrayList<>();
@@ -114,11 +114,11 @@ public class MethodEntity {
 
 		if(methodEntity.retType.contains("ResponseEntity")) {
 			
-			methodEntity.retType = TypeEntityByStrFormat.getInnerGenriceType(methodEntity.retType);
+			methodEntity.retType = TypeNameEntity.getInnerGenriceType(methodEntity.retType);
 		}
 
-		methodEntity.retType = TypeEntityByStrFormat.parse(methodEntity.retType).getSelfDefSimpleName();
-		if(ctrlEntity.IsAutoWrapMsg() && !methodEntity.retType.equals("void")) {
+		methodEntity.retType = TypeNameEntity.parse(methodEntity.retType).getSelfDefSimpleName();
+		if(ctrlEntity.isAutoWrapMsg() && !methodEntity.retType.equals("void")) {
 			methodEntity.retType = "EnouMsgJson<" + methodEntity.retType + ">";
 		}
 
@@ -126,7 +126,7 @@ public class MethodEntity {
 			
 			ParamEntity paramEntity = new ParamEntity();
 			
-			TypeEntityByStrFormat typeEntity = TypeEntityByStrFormat.parse(param.getType().getName());
+			TypeNameEntity typeEntity = TypeNameEntity.parse(param.getType().getName());
 			paramEntity.setParamName(param.getName());
 			paramEntity.setParamType(typeEntity.getSelfDefSimpleName());
 			

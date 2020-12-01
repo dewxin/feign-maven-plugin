@@ -1,12 +1,5 @@
 package fun.enou.maven.model;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-
-import fun.enou.maven.tool.Logger;
 
 public class ParamEntity {
 

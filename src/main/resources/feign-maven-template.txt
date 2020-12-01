@@ -12,11 +12,9 @@
   </properties>
  
   <dependencies>
-    <dependency>
-		<groupId>fun.enou.alpha</groupId>
-		<artifactId>fun-enou-alpha-core</artifactId>
-		<version>0.0.1</version>
-    </dependency>
+
+    ^selfDefinedPackageStub$
+
     
 	<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign -->
 	<dependency>

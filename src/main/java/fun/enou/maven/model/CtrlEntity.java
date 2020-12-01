@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import fun.enou.maven.tool.DataCenter;
 import fun.enou.maven.tool.Filter;
 import fun.enou.maven.tool.Logger;
 
@@ -19,7 +20,7 @@ public class CtrlEntity {
 	
 	private boolean isAutoWrapMsg; // todo make this funtion as a module plugin 
 	
-	private List<MethodEntity> methodEntityList = new LinkedList<MethodEntity>();
+	private List<MethodEntity> methodEntityList = new LinkedList<>();
 	
 	
 	public List<String> methodToStringList() {
@@ -36,6 +37,9 @@ public class CtrlEntity {
 		
 		for(Annotation annotation : aClass.getAnnotations()) {
 			ctrlEntity.isAutoWrapMsg = annotation.toString().contains("AutoWrapMsg");
+			if(ctrlEntity.isAutoWrapMsg){
+				DataCenter.instance().setHasAutoWrapMsg(true);
+			}
 			Logger.debug("{0} has annotation autoWrapMsg", ctrlEntity.name);
 		}
 		RequestMapping reqMap = aClass.getAnnotation(RequestMapping.class);
@@ -49,30 +53,34 @@ public class CtrlEntity {
 			ctrlEntity.path = reqMap.value()[0];
 		}
 		
-		Method[] methodArray = aClass.getDeclaredMethods();
+		List<Method> methodArray = getMapAnnotatedMethod(aClass);
 
 		for(Method method : methodArray) {
-			boolean hasMappingAnnotation = false;
-			
-			//todo handle requestMapping as well
-			for(Annotation annotation: method.getAnnotations()) {
-				if(Filter.isSpecificMapping(annotation)) {
-					hasMappingAnnotation = true;
-					break;
-				}
-			}
-			
-			if(!hasMappingAnnotation)
-				continue;
-			
 			MethodEntity methodEntity = MethodEntity.toEntity(method, ctrlEntity);
 			ctrlEntity.addMethodEntity(methodEntity);
 		}
 
 		return ctrlEntity;
 	}
+
+	public static List<Method> getMapAnnotatedMethod(Class<?> aClass) {
+		List<Method> methodList = new LinkedList<>();
+		Method[] methodArray = aClass.getDeclaredMethods();
+
+		for(Method method : methodArray) {
+			//todo handle requestMapping as well
+			for(Annotation annotation: method.getAnnotations()) {
+				if(Filter.isHttpMappingAnnotation(annotation)) {
+					methodList.add(method);
+					break;
+				}
+			}
+		}
+
+		return methodList;
+	}
 	
-	public boolean IsAutoWrapMsg() {
+	public boolean isAutoWrapMsg() {
 		return this.isAutoWrapMsg;
 	}
 	

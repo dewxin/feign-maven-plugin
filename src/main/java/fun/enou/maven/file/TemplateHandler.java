@@ -1,5 +1,6 @@
 package fun.enou.maven.file;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -16,9 +17,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.xml.crypto.Data;
+
 import edu.emory.mathcs.backport.java.util.Collections;
 import fun.enou.maven.model.CtrlEntity;
 import fun.enou.maven.model.PojoEntity;
+import fun.enou.maven.tool.DataCenter;
 import fun.enou.maven.tool.Logger;
 import junit.framework.Assert;
 
@@ -28,26 +32,24 @@ public class TemplateHandler {
 	private static final String INTERFACE_FILE_NAME ="/feign-client-interface-template.txt";
 	private static final String POJO_FILE_NAME ="/feign-client-pojo-template.txt";
 	private static final String MAVEN_POM_FILE_NAME ="/feign-maven-template.txt";
+	private static final String MAVEN_SELF_PACKAGE_STUB = "^selfDefinedPackageStub$";
 	private static final String FEIGN_CLIENT_STUB = "^feignClientAnnotationStub$";
-	private static final String CONTROLLER_NAME_STUB = "^controllerNameStub$";
+	private static final String APP_NAME_STUB = "^appNameStub$";
 	private static final String METHOD_STUB = "^methodStub$"; 
 	private static final String APPLICATION_NAME_STUB = "^applicationNameStub$"; 
 	
 	private static final String IMPORT_STUB = "^importStub$";
 
-	
+	private static TemplateHandler templateHandler = new TemplateHandler();
+
+	public static TemplateHandler instance() {
+		return templateHandler;
+	}
+
 	
 	private List<String> interfaceTemplateLines = new LinkedList<>();
 	private List<String> pojoTemplateLines = new LinkedList<>();
 	
-	private String applicationName = "";
-	private List<CtrlEntity> controllerList;
-	
-	
-	public TemplateHandler(String applicationName, List<CtrlEntity> controllerList) {
-		this.applicationName = applicationName;
-		this.controllerList = controllerList;
-	}
 	
 	public void init() throws IOException {
 		readInterfaceResource();
@@ -75,10 +77,10 @@ public class TemplateHandler {
 		}
 	}
 	
-	public List<String> generateControllerFile(CtrlEntity ctrlEntity) {
+	private List<String> generateControllerFile(List<CtrlEntity> ctrlEntityList) {
 		List<String> outputLines = new LinkedList<>();
 		for(String line : interfaceTemplateLines) {
-			List<String> lines = handleOneLine(line, ctrlEntity);
+			List<String> lines = handleOneLine(line, ctrlEntityList);
 			outputLines.addAll(lines);
 		}
 		
@@ -86,29 +88,44 @@ public class TemplateHandler {
 	}
 	
 	//todo need tab to make the code look beautiful
-	public void generateAllCtrlAndPojo() throws IOException, ClassNotFoundException, InterruptedException {
+	public void generateAllCtrlAndPojo() throws IOException, ClassNotFoundException {
 		String baseDir = FileHandler.getCodeDir();
 		File dir = new File(baseDir);
-		if(!dir.exists())
+		if(!dir.exists()) {
 			dir.mkdirs();
-		
-		for(CtrlEntity ctrlEntity : controllerList) {
-			List<String> lines = generateControllerFile(ctrlEntity);
-			FileHandler.writeToFile(baseDir+ctrlEntity.getName()+"Client.java",lines);
 		}
-		
+
+		List<CtrlEntity> controllerList = DataCenter.instance().getCtrlEntityList();
+
+		List<String> lines = generateControllerFile(controllerList);
+		FileHandler.writeToFile(baseDir+ DataCenter.instance().getFormattedAppName()+"Client.java",lines);
+
 		PojoEntity.generateAllPojo(pojoTemplateLines);
+	}
+
+	public void generatePomFile() throws IOException {
 		List<String> pomLines = getMavenPomLines();
 		FileHandler.writeToFile(FileHandler.getBaseDir()+"pom.xml", pomLines);
+	}
+
+	public void install() throws IOException {
+		
 		ProcessBuilder pb = new ProcessBuilder("mvn.cmd", "install", "-f", FileHandler.getBaseDir()+"pom.xml");
 		pb.redirectErrorStream();
 		Process process = pb.start();
-		process.waitFor();
-		Logger.debug("{0}",process.exitValue());
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "GBK"))) {
-		    String result = reader.lines()
-		            .collect(Collectors.joining("\n"));
-		    Logger.debug(result);
+
+		Logger.info("start installing auto generated project");
+
+		BufferedInputStream in = new BufferedInputStream(process.getInputStream());
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+		String str  = "";
+		while((str = reader.readLine())!=null) {
+			Logger.info(str);
+		}
+		
+		if(process.exitValue() != 0) {
+			System.exit(process.exitValue());
 		}
 	}
 	
@@ -118,26 +135,39 @@ public class TemplateHandler {
 		
 		List<String> mavenPomLines = new LinkedList<>();
 		String line = "";
-		while((line = reader.readLine()) != null) {
-			if(line.contains(APPLICATION_NAME_STUB))
-				line = line.replace(APPLICATION_NAME_STUB, applicationName.toLowerCase());
-			mavenPomLines.add(line);
+		while ((line = reader.readLine()) != null) {
+			if (line.contains(APPLICATION_NAME_STUB)) {
+				line = line.replace(APPLICATION_NAME_STUB, DataCenter.instance().getOriginAppName().toLowerCase());
+				mavenPomLines.add(line);
+			} else if (line.contains(MAVEN_SELF_PACKAGE_STUB)){
+				if(DataCenter.instance().hasAutoWarpMsg()) {
+					mavenPomLines.add("<dependency>");
+					mavenPomLines.add("<groupId>fun.enou.alpha</groupId>");
+					mavenPomLines.add("<artifactId>fun-enou-alpha-core</artifactId>");
+					mavenPomLines.add("<version>0.0.1</version>");
+					mavenPomLines.add("</dependency>");
+				}
+
+			} else {
+				mavenPomLines.add(line);
+			}
 		}
 		
 		return mavenPomLines;
 	}
 	
 	
-	
-	private List<String> handleOneLine(String inputLine, CtrlEntity ctrlEntity) {
+	private List<String> handleOneLine(String inputLine, List<CtrlEntity> ctrlEntityList) {
 		
 		if(inputLine.contains(IMPORT_STUB)) {
 			ArrayList<String> importLineList = new ArrayList<>();
-			if(ctrlEntity.IsAutoWrapMsg()) {
-				importLineList.add("import fun.enou.core.msg.EnouMsgJson;");
-				
+			for(CtrlEntity ctrlEntity : ctrlEntityList)
+			{
+				if(ctrlEntity.isAutoWrapMsg()) {
+					importLineList.add("import fun.enou.core.msg.EnouMsgJson;");
+					break;
+				}
 			}
-			
 			return importLineList;
 		}
 		
@@ -145,15 +175,10 @@ public class TemplateHandler {
 			Logger.debug("has application name");
 			Logger.debug(inputLine);
 			
-			Assert.assertFalse(applicationName.isEmpty());
+			Assert.assertFalse(DataCenter.instance().getOriginAppName().isEmpty());
 			ArrayList<String> feignClientParamList = new ArrayList<>();
-			String valueParam = MessageFormat.format("value=\"{0}\"", applicationName);
+			String valueParam = MessageFormat.format("value=\"{0}\"", DataCenter.instance().getOriginAppName());
 			feignClientParamList.add(valueParam);
-			
-			if(!ctrlEntity.getPath().isEmpty()) {
-				String pathParam = MessageFormat.format("path=\"{0}\"", ctrlEntity.getPath());
-				feignClientParamList.add(pathParam);
-			}
 			
 			String feignClientParam = String.join(",", feignClientParamList);
 
@@ -163,16 +188,21 @@ public class TemplateHandler {
 			return resultList;
 		}
 
-		if(inputLine.contains(CONTROLLER_NAME_STUB)) {
+		if(inputLine.contains(APP_NAME_STUB)) {
 			Logger.debug("has controller name");
 			Logger.debug(inputLine);
 			ArrayList<String> resultList = new ArrayList<>();
-			resultList.add(inputLine.replace(CONTROLLER_NAME_STUB, ctrlEntity.getName()));
+			resultList.add(inputLine.replace(APP_NAME_STUB, DataCenter.instance().getFormattedAppName()));
 			return resultList;
 		}
 
 		if(inputLine.contains(METHOD_STUB)) {
-			return ctrlEntity.methodToStringList();
+			List<String> resultList = new LinkedList<>();
+			for(CtrlEntity ctrlEntity : ctrlEntityList) {
+				List<String> strLines = ctrlEntity.methodToStringList();
+				resultList.addAll(strLines);
+			}
+			return resultList;
 		}
 
 		ArrayList<String> resultList = new ArrayList<>();

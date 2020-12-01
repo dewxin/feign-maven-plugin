@@ -8,10 +8,13 @@ public class Logger {
 	
 	private static Log log;
 	
-	
 
 	public static void setLog(Log log) {
 		Logger.log = log;
+	}
+
+	public static void error(CharSequence charSequence) {
+		log.error(charSequence);
 	}
 	
 	public static void warn(CharSequence charSequence) {

@@ -13,19 +13,29 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import fun.enou.maven.tool.DataCenter;
 import fun.enou.maven.tool.Logger;
+import junit.framework.Assert;
 
-public class JarHandler {
+public class JarDataParser {
 	
 	private String pathToJarFile;
+
+	private static JarDataParser jarDataParser = new JarDataParser();
+	public static JarDataParser instance() {
+		return jarDataParser;
+	}
 	
-	public void init() {
-		try {
-			pathToJarFile = findJarFileAndRetPath();
-			EnouJarLuncher.newInstance(pathToJarFile).init();
-		} catch (Exception e) {
-			Logger.warn(e.getMessage());
-		}
+	/**
+	 * create the classLoader will be used later, and get the application name
+	 * @throws IOException
+	 */
+	public void init() throws IOException {
+		pathToJarFile = findJarFileAndRetPath();
+		Assert.assertNotNull(pathToJarFile);
+		Logger.debug("pathToJarFile value is {0}", pathToJarFile);
+		EnouJarLuncher.newInstance(pathToJarFile).init();
+		getApplicationName();
 	}
 	
 	private String findJarFileAndRetPath(){
@@ -54,30 +64,50 @@ public class JarHandler {
 		return pathToJarFile;
 	}
 	
+	public String getApplicationName() throws IOException {
+		try (JarFile jarFile = new JarFile(pathToJarFile)) {
+			JarEntry entry = jarFile.getJarEntry("BOOT-INF/classes/application.properties");
+			InputStream input = jarFile.getInputStream(entry);
+	        BufferedReader br = new BufferedReader(new InputStreamReader(input));
+	        String line = "";
+	        while((line = br.readLine())!=null) {
+	        	String[] splitStr = line.split("=");
+				if(splitStr[0].equals("spring.application.name"))
+				{
+					String applicationName = splitStr[1];
+					Logger.debug("application name is "+ applicationName);
+					DataCenter.instance().setApplicationName(applicationName);
+					return applicationName;
+				}
+	        }
+		}
+		
+		return null;
+	}
+
 
 	public List<Class<?>> loadAllClasses() throws IOException, ClassNotFoundException   {
 		try (JarFile jarFile = new JarFile(pathToJarFile)) {
 			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-			
 
-			LinkedList<Class<?>> classList = new LinkedList<Class<?>>();
+			LinkedList<Class<?>> classList = new LinkedList<>();
 			Enumeration<JarEntry> e = jarFile.entries();
 			while (e.hasMoreElements()) {
 				JarEntry javaEntry = e.nextElement();
-				if (javaEntry.isDirectory() || !javaEntry.getName().endsWith(".class")) {
+
+				boolean isDir = javaEntry.isDirectory();
+				boolean isClass = javaEntry.getName().endsWith("class");
+				boolean isSource = javaEntry.getName().startsWith("BOOT-INF/classes/");
+
+				if (isDir || !isClass || !isSource)
 					continue;
-				}
-				if(!javaEntry.getName().startsWith("BOOT-INF/classes")) {
-					continue;
-				}
 				
-				String className = javaEntry.getName().substring(17, javaEntry.getName().length() - 6);
+				int prefixSize = "BOOT-INF/classes/".length();
+				int suffixSize= ".class".length();
+				String className = javaEntry.getName().substring(prefixSize, javaEntry.getName().length() - suffixSize);
 				className = className.replace('/', '.');
 				
-				//attention:
-				//have to load class in this way, otherwise cannot find the annotation.
 				try {
-					Logger.debug(className);
 					Class<?> aClass = Class.forName(className, true, classLoader);
 					classList.add(aClass);
 				} catch (NoClassDefFoundError error) {
@@ -92,20 +122,5 @@ public class JarHandler {
 		}
 	}
 	
-	public String getApplicationName() throws IOException {
-		try (JarFile jarFile = new JarFile(pathToJarFile)) {
-			JarEntry entry = jarFile.getJarEntry("BOOT-INF/classes/application.properties");
-			InputStream input = jarFile.getInputStream(entry);
-	        BufferedReader br = new BufferedReader(new InputStreamReader(input));
-	        String line = "";
-	        while((line = br.readLine())!=null) {
-	        	String[] splitStr = line.split("=");
-	        	if(splitStr[0].equals("spring.application.name"))
-	        		return splitStr[1];
-	        }
-		}
-		
-		return null;
-	}
 
 }
