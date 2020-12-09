@@ -6,6 +6,8 @@
 
 ## 如何使用
 
+### 生成feign工程并添加依赖
+
 在你需要生成对应`feign`代码的项目`pom.xml`文件中添加以下配置。我们暂且称其为`feign`源工程，根据源工程生成`feign`工程，我们会在`feign`使用工程中调用`feign`工程中的代码。
 
 ```xml
@@ -72,3 +74,17 @@
 </dependency>
 ```
 
+
+
+如果你在`application.properties`中配置的`spring.application.name`的值为`SERVICE-SOURCE`,`SOURCE-SERVICE`,`source`,`SOURCE`中的任意一个，那么生成对应feign接口的名字则为`SourceClient`。
+
+```java
+import com.github.dewxin.generated.auto_client.SourceClient;
+
+@FeignClient(value="SERVICE-SOURCE", contextId = "feign")
+public interface SourceFeignClient extends SourceClient {
+}
+
+```
+
+此处需要添加 `contextId`，否则的话`feign`会生成两个同名的`bean`。
