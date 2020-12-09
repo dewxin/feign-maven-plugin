@@ -1,4 +1,4 @@
-package fun.enou.maven.model;
+package com.github.dewxin.model;
 
 
 public class TypeNameEntity {

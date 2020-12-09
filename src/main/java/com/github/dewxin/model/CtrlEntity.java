@@ -1,4 +1,4 @@
-package fun.enou.maven.model;
+package com.github.dewxin.model;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.github.dewxin.tool.DataCenter;
+import com.github.dewxin.tool.Filter;
+import com.github.dewxin.tool.Logger;
 
-import fun.enou.maven.tool.DataCenter;
-import fun.enou.maven.tool.Filter;
-import fun.enou.maven.tool.Logger;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 public class CtrlEntity {
 	

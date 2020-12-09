@@ -1,4 +1,4 @@
-package fun.enou.maven.file;
+package com.github.dewxin.file;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,13 +13,15 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import fun.enou.maven.tool.DataCenter;
-import fun.enou.maven.tool.Logger;
+import com.github.dewxin.tool.DataCenter;
+import com.github.dewxin.tool.Logger;
+
 import junit.framework.Assert;
 
 public class JarDataParser {
 	
 	private String pathToJarFile;
+	private String targetAbsPathStr;
 
 	private static JarDataParser jarDataParser = new JarDataParser();
 	public static JarDataParser instance() {
@@ -39,16 +41,17 @@ public class JarDataParser {
 	}
 	
 	private String findJarFileAndRetPath(){
-		File targeDir = new File("target");
+		targetAbsPathStr = DataCenter.instance().getProjectBaseDir()+"/target/";
+		File targeDir = new File(targetAbsPathStr);
 
 		String[] filenameArray = targeDir.list((dir,name)->{return name.matches("(.*).jar");});
 		if(filenameArray.length != 1) {
 			Logger.warn("more than one jar.original file found in target diretory");
 		}
 		
-		File origin = new File("target/"+filenameArray[0]);
+		File origin = new File(targetAbsPathStr+filenameArray[0]);
 		
-		String copyFileName = MessageFormat.format("target/{0}.copy", origin.getName());
+		String copyFileName = targetAbsPathStr + MessageFormat.format("{0}.copy", origin.getName());
 		File originCopy = new File(copyFileName);
 		if(originCopy.exists())
 			originCopy.delete();

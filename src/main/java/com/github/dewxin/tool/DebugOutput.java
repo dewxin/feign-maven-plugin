@@ -1,4 +1,4 @@
-package fun.enou.maven.tool;
+package com.github.dewxin.tool;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

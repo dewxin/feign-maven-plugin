@@ -1,4 +1,4 @@
-package fun.enou.maven.file;
+package com.github.dewxin.file;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,13 +6,14 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.List;
 
-import fun.enou.maven.tool.Logger;
+import com.github.dewxin.tool.DataCenter;
+import com.github.dewxin.tool.Logger;
 
 public class FileHandler {
 
-	private static String codeDir = "target/enou-feignpp/src/main/java/fun/enou/feign/generated/auto_client/";
+	private static String codeDir = "/target/dewxin-feign-plugin/src/main/java/com/github/dewxin/generated/auto_client/";
 	
-	private static String baseDir = "target/enou-feignpp/";
+	private static String baseDir = "/target/dewxin-feign-plugin/";
 
 	
 	public static void writeToFile(String fileName, List<String> lines) throws IOException {
@@ -26,17 +27,16 @@ public class FileHandler {
 	}
 	
 	public static String getBaseDir() {
-		return baseDir;
+		return DataCenter.instance().getProjectBaseDir() + baseDir;
 	}
 	
 	public static String getCodeDir() {
-		return codeDir;
+		return DataCenter.instance().getProjectBaseDir() + codeDir;
 	}
 
 	public static void setBaseDir(String baseDir) {
 		FileHandler.codeDir = baseDir;
 	}
-	
 	
 	
 }

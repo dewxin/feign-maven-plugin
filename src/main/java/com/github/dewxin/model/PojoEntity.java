@@ -1,4 +1,4 @@
-package fun.enou.maven.model;
+package com.github.dewxin.model;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -6,9 +6,9 @@ import java.text.MessageFormat;
 import java.util.LinkedList;
 import java.util.List;
 
-import fun.enou.maven.file.FileHandler;
-import fun.enou.maven.tool.DataCenter;
-import fun.enou.maven.tool.Logger;
+import com.github.dewxin.file.FileHandler;
+import com.github.dewxin.tool.DataCenter;
+import com.github.dewxin.tool.Logger;
 
 public class PojoEntity {
 	

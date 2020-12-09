@@ -1,4 +1,4 @@
-package fun.enou.maven.model;
+package com.github.dewxin.model;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -8,6 +8,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.dewxin.tool.Logger;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,8 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import fun.enou.maven.tool.Logger;
 
 
 public class MethodEntity {
@@ -30,7 +30,6 @@ public class MethodEntity {
 	private String retType = ""; 
 	private String methodName = "";
 	private ArrayList<ParamEntity> parameterList = new ArrayList<ParamEntity>();
-	
 	
 	
 	public List<String> toStringList() {

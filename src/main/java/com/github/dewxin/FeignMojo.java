@@ -1,7 +1,16 @@
-package fun.enou.maven;
+package com.github.dewxin;
 
 import java.io.IOException;
 import java.util.List;
+
+import javax.xml.crypto.Data;
+
+import com.github.dewxin.file.FileHandler;
+import com.github.dewxin.file.JarDataParser;
+import com.github.dewxin.file.TemplateHandler;
+import com.github.dewxin.tool.DataCenter;
+import com.github.dewxin.tool.Logger;
+import com.github.dewxin.tool.PhaseMarker;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -10,13 +19,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-
-import fun.enou.maven.file.FileHandler;
-import fun.enou.maven.file.JarDataParser;
-import fun.enou.maven.file.TemplateHandler;
-import fun.enou.maven.tool.DataCenter;
-import fun.enou.maven.tool.Logger;
-import fun.enou.maven.tool.PhaseMarker;
 
 
 @Mojo(name="feign", defaultPhase=LifecyclePhase.PACKAGE)
@@ -31,6 +33,7 @@ public class FeignMojo extends AbstractMojo{
 		
 		
 		try {
+
 			run();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -38,6 +41,16 @@ public class FeignMojo extends AbstractMojo{
 	}
 	
 	private void run() throws IOException, ClassNotFoundException, InterruptedException {
+		try (PhaseMarker pm = new PhaseMarker("project-info-collecting")) {
+			Logger.info("base dir is {0} ", project.getBasedir());
+			Logger.info("artifact id is {0} ", project.getArtifactId());
+			Logger.info("version is {0} ", project.getVersion());
+			DataCenter.instance().setProjectBaseDir(project.getBasedir().getAbsolutePath());
+			DataCenter.instance().setProjectArtifactId(project.getArtifactId());
+			DataCenter.instance().setProjectGroupId(project.getGroupId());
+			DataCenter.instance().setProjectVersion(project.getVersion());
+		}
+
 		try (PhaseMarker pm = new PhaseMarker("init")) {
 			JarDataParser.instance().init();
 		}

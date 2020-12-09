@@ -1,4 +1,4 @@
-package fun.enou.maven.tool;
+package com.github.dewxin.tool;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -9,9 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.github.dewxin.model.CtrlEntity;
+import com.github.dewxin.model.TypeNameEntity;
+
 import edu.emory.mathcs.backport.java.util.Arrays;
-import fun.enou.maven.model.CtrlEntity;
-import fun.enou.maven.model.TypeNameEntity;
 
 public class DataCenter {
 
@@ -20,6 +21,11 @@ public class DataCenter {
 	public static DataCenter instance() {
 		return dataHolder;
 	}
+
+	private String projectBaseDir;
+	private String projectArtifactId;
+	private String projectGroupId;
+	private String projectVersion;
 
 	private String applicationName;
 	private List<CtrlEntity> ctrlEntityList = new LinkedList<>();
@@ -39,14 +45,11 @@ public class DataCenter {
 	}
 
 	public String getFormattedAppName() {
-		int index = applicationName.indexOf("-");
-		Logger.debug("index of - is {0}", index);
 		String tmpAppName = applicationName;
-		if(index > 0) {
-			tmpAppName = tmpAppName.replace("-", "").toLowerCase();
-			tmpAppName = tmpAppName.replace("service", "");
-			tmpAppName = tmpAppName.substring(0,1).toUpperCase() + tmpAppName.substring(1);
-		}
+		
+		tmpAppName = tmpAppName.replace("-", "").toLowerCase();
+		tmpAppName = tmpAppName.replace("service", "");
+		tmpAppName = tmpAppName.substring(0,1).toUpperCase() + tmpAppName.substring(1);
 		return tmpAppName;
 	}
 
@@ -150,6 +153,38 @@ public class DataCenter {
 
 		return true;
 
+	}
+
+	public String getProjectBaseDir() {
+		return projectBaseDir;
+	}
+
+	public void setProjectBaseDir(String projectBaseDir) {
+		this.projectBaseDir = projectBaseDir;
+	}
+
+	public String getProjectArtifactId() {
+		return projectArtifactId;
+	}
+
+	public void setProjectArtifactId(String projectArtifactId) {
+		this.projectArtifactId = projectArtifactId;
+	}
+
+	public String getProjectVersion() {
+		return projectVersion;
+	}
+
+	public void setProjectVersion(String projectVersion) {
+		this.projectVersion = projectVersion;
+	}
+
+	public String getProjectGroupId() {
+		return projectGroupId;
+	}
+
+	public void setProjectGroupId(String projectGroupId) {
+		this.projectGroupId = projectGroupId;
 	}
 
 }

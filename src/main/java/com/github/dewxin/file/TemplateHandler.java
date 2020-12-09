@@ -1,4 +1,4 @@
-package fun.enou.maven.file;
+package com.github.dewxin.file;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -19,11 +19,12 @@ import java.util.stream.Collectors;
 
 import javax.xml.crypto.Data;
 
+import com.github.dewxin.model.CtrlEntity;
+import com.github.dewxin.model.PojoEntity;
+import com.github.dewxin.tool.DataCenter;
+import com.github.dewxin.tool.Logger;
+
 import edu.emory.mathcs.backport.java.util.Collections;
-import fun.enou.maven.model.CtrlEntity;
-import fun.enou.maven.model.PojoEntity;
-import fun.enou.maven.tool.DataCenter;
-import fun.enou.maven.tool.Logger;
 import junit.framework.Assert;
 
 
@@ -37,6 +38,9 @@ public class TemplateHandler {
 	private static final String APP_NAME_STUB = "^appNameStub$";
 	private static final String METHOD_STUB = "^methodStub$"; 
 	private static final String APPLICATION_NAME_STUB = "^applicationNameStub$"; 
+	private static final String PROJECT_ARTIFACT_ID_STUB = "^projectArtifactIdStub$";
+	private static final String PROJECT_GROUP_ID_STUB = "^projectGroupIdStub$";
+	private static final String PROJECT_VERSION_STUB ="^projectVersionStub$";
 	
 	private static final String IMPORT_STUB = "^importStub$";
 
@@ -136,8 +140,14 @@ public class TemplateHandler {
 		List<String> mavenPomLines = new LinkedList<>();
 		String line = "";
 		while ((line = reader.readLine()) != null) {
-			if (line.contains(APPLICATION_NAME_STUB)) {
-				line = line.replace(APPLICATION_NAME_STUB, DataCenter.instance().getOriginAppName().toLowerCase());
+			if (line.contains(PROJECT_ARTIFACT_ID_STUB)) {
+				line = line.replace(PROJECT_ARTIFACT_ID_STUB, DataCenter.instance().getProjectArtifactId());
+				mavenPomLines.add(line);
+			} else if (line.contains(PROJECT_VERSION_STUB)) {
+				line = line.replace(PROJECT_VERSION_STUB, DataCenter.instance().getProjectVersion());
+				mavenPomLines.add(line);
+			} else if (line.contains(PROJECT_GROUP_ID_STUB)) {
+				line = line.replace(PROJECT_GROUP_ID_STUB, DataCenter.instance().getProjectGroupId());
 				mavenPomLines.add(line);
 			} else if (line.contains(MAVEN_SELF_PACKAGE_STUB)){
 				if(DataCenter.instance().hasAutoWarpMsg()) {

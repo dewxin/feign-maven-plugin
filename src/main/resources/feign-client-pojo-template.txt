@@ -1,4 +1,4 @@
-package fun.enou.feign.generated.auto_client;
+package com.github.dewxin.generated.auto_client;
 public class ^pojoNameStub$ {
     
     ^fieldStub$

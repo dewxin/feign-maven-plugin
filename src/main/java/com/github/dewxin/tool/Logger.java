@@ -1,4 +1,4 @@
-package fun.enou.maven.tool;
+package com.github.dewxin.tool;
 
 import java.text.MessageFormat;
 
@@ -24,6 +24,12 @@ public class Logger {
 	public static void info (CharSequence charSequence) {
 		log.info(charSequence);
 	}
+
+	public static void info (String format, Object... args) {
+		String str = MessageFormat.format(format, args);
+				
+		log.info(str);
+	}	
 	
 	public static void debug (CharSequence charSequence) {
 		log.debug(charSequence);
