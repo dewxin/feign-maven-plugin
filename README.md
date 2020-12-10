@@ -11,27 +11,27 @@
 在你需要生成对应`feign`代码的项目`pom.xml`文件中添加以下配置。我们暂且称其为`feign`源工程，根据源工程生成`feign`工程，我们会在`feign`使用工程中调用`feign`工程中的代码。
 
 ```xml
-	<build>
-		<plugins>
-            <plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-	        <plugin>
-				<groupId>com.github.dewxin</groupId>
-				<artifactId>feign-maven-plugin</artifactId>
-				<version>1.0.0</version><!-- 使用最新版本 -->
-				<executions>
-					<execution>
-						<goals>
-							<goal>feign</goal>
-						</goals>
-						<phase>package</phase>
-					</execution>
-				</executions>
-        	</plugin>
-		</plugins>
-	</build>
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+        <plugin>
+            <groupId>com.github.dewxin</groupId>
+            <artifactId>feign-maven-plugin</artifactId>
+            <version>1.0.0</version><!-- 使用最新版本 -->
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>feign</goal>
+                    </goals>
+                    <phase>package</phase>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
 ```
 
 **注意：此处`<plugin>`标签需要放置在`spring-boot-maven-plugin`之后。**
