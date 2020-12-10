@@ -8,8 +8,82 @@
 	<artifactId>feign-maven-plugin</artifactId>
 	<version>1.0.0</version>
 	<name>feign-maven-plugin</name>
-	<description>Demo project for Spring Boot</description>
+	<description>a project generating feign code</description>
 	<url>https://github.com/dewxin/feign-maven-plugin</url>
+
+	<licenses>
+	       <license>
+           <name>MIT License</name>
+           <url>https://github.com/dewxin/feign-maven-plugin/blob/master/LICENSE</url>
+           <distribution>repo</distribution>
+       </license>
+	</licenses>
+
+	<developers>
+       <developer>
+           <name>xinlutong</name>
+           <email>xinluton@qq.com</email>
+       </developer>
+    </developers>
+
+    <scm>
+       <tag>master</tag>
+       <connection>https://github.com/dewxin/feign-maven-plugin.git</connection>
+       <developerConnection>https://github.com/dewxin/</developerConnection>
+       <url>https://github.com/dewxin/feign-maven-plugin.git</url>
+    </scm>
+
+    <profiles>
+       <profile>
+           <id>release</id>
+           <build>
+              <plugins>
+                  <!-- Source -->
+                  <plugin>
+				  	<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-plugin-plugin</artifactId>
+					<version>3.6.0</version>
+                  </plugin>
+
+                  <!-- GPG -->
+
+                  <plugin>
+
+                     <groupId>org.apache.maven.plugins</groupId>
+                     <artifactId>maven-gpg-plugin</artifactId>
+                     <version>1.5</version>
+
+                     <executions>
+                         <execution>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>sign</goal>
+                            </goals>
+                         </execution>
+                     </executions>
+
+                  </plugin>
+              </plugins>
+           </build>
+
+           <distributionManagement>
+              <snapshotRepository>
+                  <id>sonatype</id>
+                  <url>
+                     https://oss.sonatype.org/content/repositories/snapshots/
+                  </url>
+              </snapshotRepository>
+
+              <repository>
+                  <id>sonatype</id>
+                  <url>
+                     https://oss.sonatype.org/service/local/staging/deploy/maven2/
+                  </url>
+              </repository>
+           </distributionManagement>
+       </profile>
+    </profiles>
+
 
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>

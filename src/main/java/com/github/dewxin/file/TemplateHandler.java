@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.xml.crypto.Data;
@@ -24,7 +25,6 @@ import com.github.dewxin.model.PojoEntity;
 import com.github.dewxin.tool.DataCenter;
 import com.github.dewxin.tool.Logger;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import junit.framework.Assert;
 
 
@@ -112,7 +112,7 @@ public class TemplateHandler {
 		FileHandler.writeToFile(FileHandler.getBaseDir()+"pom.xml", pomLines);
 	}
 
-	public void install() throws IOException {
+	public void install() throws IOException, InterruptedException {
 		
 		ProcessBuilder pb = new ProcessBuilder("mvn.cmd", "install", "-f", FileHandler.getBaseDir()+"pom.xml");
 		pb.redirectErrorStream();
@@ -124,10 +124,17 @@ public class TemplateHandler {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
 		String str  = "";
-		while((str = reader.readLine())!=null) {
-			Logger.info(str);
+
+		while(!process.waitFor(1, TimeUnit.MILLISECONDS)) {
+			try {
+				while((str = reader.readLine())!=null) {
+					Logger.info(str);
+				}
+			} catch(IOException exception) {
+				Logger.info(exception.getMessage());
+			}
 		}
-		
+
 		if(process.exitValue() != 0) {
 			System.exit(process.exitValue());
 		}
