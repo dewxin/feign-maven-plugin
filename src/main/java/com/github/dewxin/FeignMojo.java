@@ -33,6 +33,9 @@ public class FeignMojo extends AbstractMojo{
 		
 		
 		try {
+			DataCenter.reset();
+			TemplateHandler.reset();
+			JarDataParser.reset();
 
 			run();
 		} catch (Exception e) {
@@ -75,6 +78,5 @@ public class FeignMojo extends AbstractMojo{
 		}
 		
 	}
-	
 
 }

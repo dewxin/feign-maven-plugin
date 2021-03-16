@@ -50,6 +50,10 @@ public class TemplateHandler {
 		return templateHandler;
 	}
 
+	public static void reset() {
+		templateHandler = new TemplateHandler();
+	}
+
 	
 	private List<String> interfaceTemplateLines = new LinkedList<>();
 	private List<String> pojoTemplateLines = new LinkedList<>();
@@ -69,6 +73,7 @@ public class TemplateHandler {
 		while((line = reader.readLine()) != null) {
 			interfaceTemplateLines.add(line);
 		}
+		Logger.debug("interface template file lines is {0}", interfaceTemplateLines.size());
 	}
 	
 	public void readPojoResource() throws IOException {
@@ -79,6 +84,7 @@ public class TemplateHandler {
 		while((line = reader.readLine()) != null) {
 			pojoTemplateLines.add(line);
 		}
+		Logger.debug("pojo template file lines is {0}", pojoTemplateLines.size());
 	}
 	
 	private List<String> generateControllerFile(List<CtrlEntity> ctrlEntityList) {

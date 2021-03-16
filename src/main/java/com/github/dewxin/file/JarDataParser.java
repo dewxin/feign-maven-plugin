@@ -27,6 +27,10 @@ public class JarDataParser {
 	public static JarDataParser instance() {
 		return jarDataParser;
 	}
+
+	public static void reset() {
+		jarDataParser = new JarDataParser();
+	}
 	
 	/**
 	 * create the classLoader will be used later, and get the application name

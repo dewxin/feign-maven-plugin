@@ -22,6 +22,10 @@ public class DataCenter {
 		return dataHolder;
 	}
 
+	public static void reset() {
+		dataHolder = new DataCenter();
+	}
+
 	private String projectBaseDir;
 	private String projectArtifactId;
 	private String projectGroupId;

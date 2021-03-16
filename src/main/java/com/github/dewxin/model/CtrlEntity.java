@@ -39,8 +39,8 @@ public class CtrlEntity {
 			ctrlEntity.isAutoWrapMsg = annotation.toString().contains("AutoWrapMsg");
 			if(ctrlEntity.isAutoWrapMsg){
 				DataCenter.instance().setHasAutoWrapMsg(true);
+				Logger.debug("{0} has annotation autoWrapMsg", ctrlEntity.name);
 			}
-			Logger.debug("{0} has annotation autoWrapMsg", ctrlEntity.name);
 		}
 		RequestMapping reqMap = aClass.getAnnotation(RequestMapping.class);
 		if(reqMap != null)
